@@ -1,6 +1,6 @@
 # Iowa Bicycle Racing Association website
 
-Static site for IBRA, the USA Cycling Local Association for Iowa. It's hosted on GitHub Pages and rebuilds itself every 3 hours.
+Static site for IBRA, the USA Cycling Local Association for Iowa. It's hosted on GitHub Pages and rebuilds itself daily.
 
 **Board members updating content: see [docs/EDITING.md](docs/EDITING.md).**
 
@@ -15,7 +15,7 @@ Static site for IBRA, the USA Cycling Local Association for Iowa. It's hosted on
 
 `scripts/build.mjs` reads all of it and writes plain HTML to `dist/`. It has **no npm dependencies**: Node 20+ is the only requirement.
 
-GitHub Actions (`.github/workflows/deploy.yml`) runs the build on every push, every 3 hours, and on demand. Each run also:
+GitHub Actions (`.github/workflows/deploy.yml`) runs the build on every push, daily at 10:17 UTC (early morning in Iowa), and on demand. Each run also:
 
 - saves each season to `data/seasons/YYYY.json`, so past seasons survive even if old events are deleted from Google Calendar (past seasons are frozen once the year ends);
 - updates `data/heartbeat.txt` once a month, so GitHub never pauses the schedule for inactivity;

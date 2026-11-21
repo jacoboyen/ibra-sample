@@ -3,9 +3,10 @@ name: Build and deploy
 on:
   push:
     branches: [main]
-  # Every 3 hours: pull the latest Google Calendar and BikeReg data and redeploy.
+  # Daily at 10:17 UTC (4:17am CST / 5:17am CDT): pull the latest Google Calendar
+  # and BikeReg data and redeploy. GitHub may start scheduled runs a few minutes late.
   schedule:
-    - cron: "17 */3 * * *"
+    - cron: "17 10 * * *"
   # "Run workflow" button on the Actions tab: refresh the site right now.
   workflow_dispatch:
 

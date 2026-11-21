@@ -4,7 +4,7 @@ You never need to touch code. There are three places information comes from.
 
 ## 1. Races → Google Calendar
 
-The race calendar is the IBRA Google Calendar (iowabicycleracing@gmail.com). Add, move or cancel races there as you always have. The website picks up changes **within about 3 hours**.
+The race calendar is the IBRA Google Calendar (iowabicycleracing@gmail.com). Add, move or cancel races there as you always have. The website picks up changes **by the next morning** (the site refreshes once a day, early morning).
 
 **Title format:** start each title with a discipline prefix and a colon.
 
@@ -44,7 +44,7 @@ Results are published by USA Cycling. The site links to them; nothing to update.
 
 ## Refresh right now
 
-Don't want to wait 3 hours? On GitHub open the repository → **Actions** → **Build and deploy** → **Run workflow**.
+Don't want to wait until tomorrow? On GitHub open the repository → **Actions** → **Build and deploy** → **Run workflow**.
 
 ## When something looks wrong
 
