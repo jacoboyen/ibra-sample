@@ -1,0 +1,8 @@
+{
+  "ResultCount": 3,
+  "MatchingEvents": [
+    { "EventId": 90001, "EventName": "Sample Spring Road Race", "EventDate": "/Date(1807401600000)/", "EventPermitNumber": "2027-1001", "EventUrl": "https://www.bikereg.com/sample-spring-road-race", "EventCity": "Sampletown" },
+    { "EventId": 90002, "EventName": "Sample Gravel Classic", "EventDate": "2027-04-24T00:00:00", "EventPermitNumber": "2027-1002", "EventUrl": "https://www.bikereg.com/sample-gravel-classic", "EventCity": "Ames" },
+    { "EventId": 90003, "EventName": "Sample Criterium Weekend", "EventDate": "2027-05-30T00:00:00", "EventUrl": "https://www.bikereg.com/sample-crit-weekend", "EventCity": "Muscatine" }
+  ]
+}

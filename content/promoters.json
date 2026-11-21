@@ -1,0 +1,14 @@
+{
+  "intro": "First-time or veteran promoter, IBRA helps you get a date on the calendar, a USA Cycling permit, and riders on the start line.",
+  "fee_note": "No IBRA local association fee for Iowa races.",
+  "response_time": "",
+  "steps": [
+    { "title": "Request a date", "text": "Email the board with your event, discipline and preferred dates so we can avoid conflicts." },
+    { "title": "Apply for a permit", "text": "Submit your USA Cycling permit application. We review and approve it as the local association." },
+    { "title": "Line up officials", "text": "We help connect you with licensed officials for your event." },
+    { "title": "Go live", "text": "Put your USA Cycling permit number in your BikeReg event. Your race page and registration link appear on the IBRA site automatically." }
+  ],
+  "resources": [
+    { "title": "USA Cycling event organizer resources", "url": "https://usacycling.org/event-organizer", "note": "External" }
+  ]
+}
