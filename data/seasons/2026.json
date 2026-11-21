@@ -11,10 +11,14 @@
     "description": "",
     "permit": "",
     "website": "",
-    "registration": "",
+    "registration": "https://www.bikereg.com/74859",
     "cancelled": false,
     "year": 2026,
-    "path": "/races/2026/ibra-board-meeting-and-race-director-s-meeting/"
+    "path": "/races/2026/ibra-board-meeting-and-race-director-s-meeting/",
+    "bikeregUrl": "https://www.bikereg.com/74859",
+    "logo": "https://www.bikereg.com/BR/VirtualImages/EventLogos/bfd422dd-8b29-4eee-9b7e-552cf40d1164.png",
+    "bikeregName": "IBRA Annual Meeting and Race Director Summit",
+    "matchedBy": "name"
   },
   {
     "uid": "65ds8033vs2nss4ifk11p767sh@google.com",
@@ -45,10 +49,14 @@
     "description": "",
     "permit": "",
     "website": "",
-    "registration": "",
+    "registration": "https://www.bikereg.com/74544",
     "cancelled": false,
     "year": 2026,
-    "path": "/races/2026/iowa-spring-classic-cumming/"
+    "path": "/races/2026/iowa-spring-classic-cumming/",
+    "bikeregUrl": "https://www.bikereg.com/74544",
+    "logo": "https://www.bikereg.com/BR/VirtualImages/EventLogos/95b31d9e-74bf-48ee-b975-47cb53132b1f.png",
+    "bikeregName": "Iowa Spring Classic - Cumming 2026",
+    "matchedBy": "name"
   },
   {
     "uid": "7q11f7tugdbn0t2saidtutb9eo@google.com",
@@ -62,10 +70,14 @@
     "description": "",
     "permit": "",
     "website": "",
-    "registration": "",
+    "registration": "https://www.bikereg.com/74328",
     "cancelled": false,
     "year": 2026,
-    "path": "/races/2026/kent-park-classic/"
+    "path": "/races/2026/kent-park-classic/",
+    "bikeregUrl": "https://www.bikereg.com/74328",
+    "logo": "",
+    "bikeregName": "Kent Park Classic",
+    "matchedBy": "name"
   },
   {
     "uid": "5ajsv7g22uh3pplispkrpde9hv@google.com",
@@ -79,10 +91,14 @@
     "description": "",
     "permit": "",
     "website": "",
-    "registration": "",
+    "registration": "https://www.bikereg.com/73864",
     "cancelled": false,
     "year": 2026,
-    "path": "/races/2026/pella-roubaix/"
+    "path": "/races/2026/pella-roubaix/",
+    "bikeregUrl": "https://www.bikereg.com/73864",
+    "logo": "https://www.bikereg.com/BR/VirtualImages/EventLogos/c28cc93e-7198-4586-96f5-3a70c5b0d278.png",
+    "bikeregName": "Pella Roubaix Spring Classic",
+    "matchedBy": "name"
   },
   {
     "uid": "7sidkqmjnmc07sn2diglnf42ar@google.com",
@@ -113,10 +129,14 @@
     "description": "",
     "permit": "",
     "website": "",
-    "registration": "",
+    "registration": "https://www.bikereg.com/74154",
     "cancelled": false,
     "year": 2026,
-    "path": "/races/2026/r-i-p-ride/"
+    "path": "/races/2026/r-i-p-ride/",
+    "bikeregUrl": "https://www.bikereg.com/74154",
+    "logo": "https://www.bikereg.com/BR/VirtualImages/EventLogos/6af32731-defa-4730-813e-efb6134f4096.png",
+    "bikeregName": "R.I.P. Ride",
+    "matchedBy": "name"
   },
   {
     "uid": "2rhegilhu0c79otb50lpqd6ltd@google.com",
@@ -130,10 +150,14 @@
     "description": "",
     "permit": "",
     "website": "",
-    "registration": "",
+    "registration": "https://www.bikereg.com/75188",
     "cancelled": false,
     "year": 2026,
-    "path": "/races/2026/loess-hills-enduro/"
+    "path": "/races/2026/loess-hills-enduro/",
+    "bikeregUrl": "https://www.bikereg.com/75188",
+    "logo": "https://www.bikereg.com/BR/VirtualImages/EventLogos/6754147b-7d9d-4521-a55e-65caada7c5d7.png",
+    "bikeregName": "Loess Hills Enduro 100k",
+    "matchedBy": "name"
   },
   {
     "uid": "03jh2h4a04djlig5ntmcckpkhs@google.com",
@@ -181,10 +205,14 @@
     "description": "",
     "permit": "",
     "website": "",
-    "registration": "",
+    "registration": "https://www.bikereg.com/74246",
     "cancelled": false,
     "year": 2026,
-    "path": "/races/2026/friday-night-fever/"
+    "path": "/races/2026/friday-night-fever/",
+    "bikeregUrl": "https://www.bikereg.com/74246",
+    "logo": "https://www.bikereg.com/BR/VirtualImages/EventLogos/88f01d90-cbfa-4f37-828c-01cb3cb2aa7b.png",
+    "bikeregName": "Friday Night Fever Twilight Criterium",
+    "matchedBy": "name"
   },
   {
     "uid": "580umb41j90r6l7lmi3mvdcgat@google.com",
@@ -198,10 +226,14 @@
     "description": "",
     "permit": "",
     "website": "",
-    "registration": "",
+    "registration": "https://www.bikereg.com/74216",
     "cancelled": false,
     "year": 2026,
-    "path": "/races/2026/snake-alley-crit/"
+    "path": "/races/2026/snake-alley-crit/",
+    "bikeregUrl": "https://www.bikereg.com/74216",
+    "logo": "https://www.bikereg.com/BR/VirtualImages/EventLogos/7c54ac81-7899-4ce7-aaee-4f480a7ca6d3.png",
+    "bikeregName": "Snake Alley Criterium",
+    "matchedBy": "name"
   },
   {
     "uid": "4m3hlt9d7kuaeffeav00n0intc@google.com",
@@ -215,10 +247,14 @@
     "description": "",
     "permit": "",
     "website": "",
-    "registration": "",
+    "registration": "https://www.bikereg.com/74337",
     "cancelled": false,
     "year": 2026,
-    "path": "/races/2026/melon-city-crit/"
+    "path": "/races/2026/melon-city-crit/",
+    "bikeregUrl": "https://www.bikereg.com/74337",
+    "logo": "https://www.bikereg.com/BR/VirtualImages/EventLogos/3e89a624-269b-40c1-ac7a-816de05f7150.png",
+    "bikeregName": "46th Melon City Criterium/ Charlie Harper Memorial",
+    "matchedBy": "name"
   },
   {
     "uid": "3sa7sshqj76mf8e48j21jss5vc@google.com",
@@ -232,10 +268,14 @@
     "description": "",
     "permit": "",
     "website": "",
-    "registration": "",
+    "registration": "https://www.bikereg.com/74330",
     "cancelled": false,
     "year": 2026,
-    "path": "/races/2026/quad-cities-crit/"
+    "path": "/races/2026/quad-cities-crit/",
+    "bikeregUrl": "https://www.bikereg.com/74330",
+    "logo": "",
+    "bikeregName": "Quad Cities Criterium",
+    "matchedBy": "name"
   },
   {
     "uid": "7cr9e0nsq3h4gbqqq3jmn209s7@google.com",
@@ -368,10 +408,14 @@
     "description": "",
     "permit": "",
     "website": "",
-    "registration": "",
+    "registration": "https://www.bikereg.com/76610",
     "cancelled": false,
     "year": 2026,
-    "path": "/races/2026/iowa-state-road-race-sakari-road-race/"
+    "path": "/races/2026/iowa-state-road-race-sakari-road-race/",
+    "bikeregUrl": "https://www.bikereg.com/76610",
+    "logo": "https://www.bikereg.com/BR/VirtualImages/EventLogos/d0da2411-5b4e-4d8e-b255-03e025da7ae8.png",
+    "bikeregName": "Sakari Road Race / Iowa State Road Race Championship",
+    "matchedBy": "name"
   },
   {
     "uid": "6q8ascaqem3rmovuoig3ed9apm@google.com",
@@ -436,10 +480,14 @@
     "description": "",
     "permit": "",
     "website": "",
-    "registration": "",
+    "registration": "https://www.bikereg.com/74107",
     "cancelled": false,
     "year": 2026,
-    "path": "/races/2026/outland-gravel/"
+    "path": "/races/2026/outland-gravel/",
+    "bikeregUrl": "https://www.bikereg.com/74107",
+    "logo": "https://www.bikereg.com/BR/VirtualImages/EventLogos/b62c2f37-97dc-4e85-8fc1-cca326653fe5.png",
+    "bikeregName": "Outland Gravel p/b Hy-Vee",
+    "matchedBy": "name"
   },
   {
     "uid": "3p8u1cn5ndjc3h7u3rqge1q3jd@google.com",
@@ -470,10 +518,14 @@
     "description": "",
     "permit": "",
     "website": "",
-    "registration": "",
+    "registration": "https://www.bikereg.com/74758",
     "cancelled": false,
     "year": 2026,
-    "path": "/races/2026/iowa-state-time-trial/"
+    "path": "/races/2026/iowa-state-time-trial/",
+    "bikeregUrl": "https://www.bikereg.com/74758",
+    "logo": "https://www.bikereg.com/BR/VirtualImages/EventLogos/9fcece49-57ce-48a1-83c8-d5d1bdbb8a6a.png",
+    "bikeregName": "Iowa State Time Trial Championships",
+    "matchedBy": "name"
   },
   {
     "uid": "4ehulu708pbakflosn3pdbo94k@google.com",
@@ -521,10 +573,14 @@
     "description": "",
     "permit": "",
     "website": "",
-    "registration": "",
+    "registration": "https://www.bikereg.com/77139",
     "cancelled": false,
     "year": 2026,
-    "path": "/races/2026/sugar-bottom-scramble/"
+    "path": "/races/2026/sugar-bottom-scramble/",
+    "bikeregUrl": "https://www.bikereg.com/77139",
+    "logo": "",
+    "bikeregName": "Sugar Bottom Scramble",
+    "matchedBy": "name"
   },
   {
     "uid": "53q3ubc5rnvogjbrfvlprl6ivt@google.com",
@@ -572,10 +628,14 @@
     "description": "",
     "permit": "",
     "website": "",
-    "registration": "",
+    "registration": "https://www.bikereg.com/77553",
     "cancelled": false,
     "year": 2026,
-    "path": "/races/2026/capital-city-cross/"
+    "path": "/races/2026/capital-city-cross/",
+    "bikeregUrl": "https://www.bikereg.com/77553",
+    "logo": "https://www.bikereg.com/BR/VirtualImages/EventLogos/a8099b00-8baa-484f-86f1-8a7c5538bc03.png",
+    "bikeregName": "Capital City Cross",
+    "matchedBy": "name"
   },
   {
     "uid": "2kptg8m4k5n33vtpg0g396ju0k@google.com",
@@ -589,10 +649,14 @@
     "description": "",
     "permit": "",
     "website": "",
-    "registration": "",
+    "registration": "https://www.bikereg.com/76263",
     "cancelled": false,
     "year": 2026,
-    "path": "/races/2026/twisted-cross/"
+    "path": "/races/2026/twisted-cross/",
+    "bikeregUrl": "https://www.bikereg.com/76263",
+    "logo": "https://www.bikereg.com/BR/VirtualImages/EventLogos/1c5c98f4-565d-4ba4-b233-a72eb73c7b1c.png",
+    "bikeregName": "Twisted Cross 2026",
+    "matchedBy": "name"
   },
   {
     "uid": "6qp0kbu4r42as3ivifi05l82lk@google.com",
@@ -606,10 +670,14 @@
     "description": "",
     "permit": "",
     "website": "",
-    "registration": "",
+    "registration": "https://www.bikereg.com/77561",
     "cancelled": false,
     "year": 2026,
-    "path": "/races/2026/the-grand/"
+    "path": "/races/2026/the-grand/",
+    "bikeregUrl": "https://www.bikereg.com/77561",
+    "logo": "https://www.bikereg.com/BR/VirtualImages/EventLogos/54821431-0049-40fa-93c5-6e801330f14d.png",
+    "bikeregName": "The Grand",
+    "matchedBy": "name"
   },
   {
     "uid": "0hdofb00vut61rp120o6mg8iaj@google.com",
@@ -623,10 +691,14 @@
     "description": "",
     "permit": "",
     "website": "",
-    "registration": "",
+    "registration": "https://www.bikereg.com/77559",
     "cancelled": false,
     "year": 2026,
-    "path": "/races/2026/back-loop/"
+    "path": "/races/2026/back-loop/",
+    "bikeregUrl": "https://www.bikereg.com/77559",
+    "logo": "https://www.bikereg.com/BR/VirtualImages/EventLogos/51b8c7f7-bd1c-41b7-9e96-63ffdc881612.png",
+    "bikeregName": "Back Loop Cross",
+    "matchedBy": "name"
   },
   {
     "uid": "1i5lsv8n7j5ro3vnc2312p2ng2@google.com",
@@ -640,10 +712,14 @@
     "description": "",
     "permit": "",
     "website": "",
-    "registration": "",
+    "registration": "https://www.bikereg.com/77822",
     "cancelled": false,
     "year": 2026,
-    "path": "/races/2026/cross-is-cumming/"
+    "path": "/races/2026/cross-is-cumming/",
+    "bikeregUrl": "https://www.bikereg.com/77822",
+    "logo": "",
+    "bikeregName": "Cross is Cumming",
+    "matchedBy": "name"
   },
   {
     "uid": "1u4s7rmemk6jl9qidkiem1lbi6@google.com",
@@ -657,10 +733,14 @@
     "description": "",
     "permit": "",
     "website": "",
-    "registration": "",
+    "registration": "https://www.bikereg.com/77735",
     "cancelled": false,
     "year": 2026,
-    "path": "/races/2026/spooky-cross/"
+    "path": "/races/2026/spooky-cross/",
+    "bikeregUrl": "https://www.bikereg.com/77735",
+    "logo": "https://www.bikereg.com/BR/VirtualImages/EventLogos/d3f10c7b-3118-4bc2-adff-5407f05751a1.png",
+    "bikeregName": "Spooky Cross",
+    "matchedBy": "name"
   },
   {
     "uid": "0og87iuddvkvs5eeksf36utdt3@google.com",
@@ -674,10 +754,14 @@
     "description": "",
     "permit": "",
     "website": "",
-    "registration": "",
+    "registration": "https://www.bikereg.com/75191",
     "cancelled": false,
     "year": 2026,
-    "path": "/races/2026/arch-maker-cross-hiawatha/"
+    "path": "/races/2026/arch-maker-cross-hiawatha/",
+    "bikeregUrl": "https://www.bikereg.com/75191",
+    "logo": "https://www.bikereg.com/BR/VirtualImages/EventLogos/8b779902-02ac-4eee-9006-4229b0c5540a.png",
+    "bikeregName": "The ArchMaker CX",
+    "matchedBy": "name"
   },
   {
     "uid": "2bhae20jn8gj3s8k3kc6mnd1su@google.com",
@@ -691,9 +775,13 @@
     "description": "",
     "permit": "",
     "website": "",
-    "registration": "",
+    "registration": "https://www.bikereg.com/78088",
     "cancelled": false,
     "year": 2026,
-    "path": "/races/2026/iowa-state-cyclocross-championships/"
+    "path": "/races/2026/iowa-state-cyclocross-championships/",
+    "bikeregUrl": "https://www.bikereg.com/78088",
+    "logo": "https://www.bikereg.com/BR/VirtualImages/EventLogos/3bf6a552-b9ad-4b9e-91a2-4721ac964f0f.png",
+    "bikeregName": "Iowa State Cyclocross Championships",
+    "matchedBy": "name"
   }
 ]
