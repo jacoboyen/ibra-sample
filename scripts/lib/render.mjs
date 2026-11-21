@@ -114,8 +114,7 @@ ${logo}<div class="event-text">
 <div class="event-meta"><span class="sr-date">${esc(rangeText(r.start, r.end))}</span>${meta(r) ? ' · ' + esc(meta(r)) : ''}</div>
 </div>
 </div>
-<span class="pill">${esc(r.kind)}</span>
-<div class="event-side">${side}</div>
+${r.kind !== 'Other' ? `<span class="pill">${esc(r.kind)}</span>\n` : ''}<div class="event-side">${side}</div>
 </div>`;
   }
 
@@ -164,7 +163,7 @@ ${g.races.map((r) => eventRow(r, opts)).join('\n')}
       eventAttendanceMode: 'https://schema.org/OfflineEventAttendanceMode',
       url: abs(r.path),
       image: [abs('/images/og-default.png')],
-      description: (r.description || `${r.kind} bicycle race in ${r.city || 'Iowa'}.`).slice(0, 500),
+      description: (r.description || `${r.kind === 'Other' ? 'Bicycle' : r.kind} race in ${r.city || 'Iowa'}.`).slice(0, 500),
       organizer: { '@type': 'Organization', name: site.name, url: abs('/') },
     };
     if (r.location) {
@@ -286,10 +285,11 @@ ${others.length ? `<section class="section"><h2 class="display" style="font-size
 
   function race(r) {
     const past = isPast(r);
+    const tags = (r.kind !== 'Other' ? `<span class="pill">${esc(r.kind)}</span>` : '') + (r.cancelled ? '<span class="pill pill-cancel">Cancelled</span>' : '');
     const facts = [
       ['When', rangeText(r.start, r.end)],
       ['Where', r.location || r.city],
-      ['Discipline', r.kind],
+      ['Discipline', r.kind !== 'Other' ? r.kind : ''],
       ['USAC permit', r.permit],
     ].filter(([, v]) => v);
     const mapLink = r.location ? `https://www.google.com/maps/search/?api=1&query=${encodeURIComponent(r.location)}` : '';
@@ -297,8 +297,7 @@ ${others.length ? `<section class="section"><h2 class="display" style="font-size
 <p class="breadcrumb"><a href="${u('/calendar/')}">Calendar</a> / <a href="${u(r.year >= yearOf(today) ? '/calendar/' : `/calendar/${r.year}/`)}">${r.year}</a></p>
 <div class="race-head">
 <div class="main">
-<p style="margin:0 0 16px;display:flex;gap:8px;flex-wrap:wrap"><span class="pill">${esc(r.kind)}</span>${r.cancelled ? '<span class="pill pill-cancel">Cancelled</span>' : ''}</p>
-<h1 class="display">${esc(r.title)}</h1>
+${tags ? `<p style="margin:0 0 16px;display:flex;gap:8px;flex-wrap:wrap">${tags}</p>\n` : ''}<h1 class="display">${esc(r.title)}</h1>
 <p class="lede">${esc(dowRange(r.start, r.end))}, ${esc(rangeText(r.start, r.end))}${r.city ? ' · ' + esc(r.city) : ''}</p>
 <div class="actions">
 ${!past && !r.cancelled && r.registration ? `<a class="btn btn-dark" href="${esc(r.registration)}">Register on BikeReg ↗</a>` : ''}
