@@ -42,8 +42,8 @@ npm run serve          # preview dist/ at http://localhost:8080
 
 ## Known assumptions to check after the first live run
 
-- **BikeReg endpoint and fields.** BikeReg documents the query parameters but not the endpoint address or the response fields. The code uses `https://www.bikereg.com/api/search` (override with the `BIKEREG_ENDPOINT` environment variable) and reads fields tolerantly. If the first Actions run warns that the BikeReg lookup failed, the site still builds; registration links then come only from BikeReg URLs pasted into calendar descriptions.
-- **Permit matching** needs the permit number in the calendar description (`Permit: 2027-1234`) and in BikeReg. Without it, the build falls back to matching the same start date plus a similar name.
+- **BikeReg** (checked Nov 2026): `https://www.bikereg.com/api/search?states=IA&year=YYYY` returns JSON with `EventId`, `EventName`, `EventDate`, `EventPermalink` and `Permit`. About half of Iowa events carry a permit. BikeReg formats it as `15418` or `<id>:15418`, so matching uses the trailing number: `Permit: 2027-15418` in the calendar matches either. The public `/events` page is behind a Cloudflare bot check and can't be used. Override the endpoint with `BIKEREG_ENDPOINT` if it ever moves.
+- **Permit matching** needs the permit number in the calendar description and in BikeReg. Without it, the build falls back to matching the same start date plus a similar name.
 
 ## SEO and AI crawlers
 

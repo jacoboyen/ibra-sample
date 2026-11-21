@@ -3,7 +3,7 @@ import assert from 'node:assert/strict';
 import { readFileSync } from 'node:fs';
 import { parseICS } from '../scripts/lib/ics.mjs';
 import { normalizeEvents, shortLocation } from '../scripts/lib/events.mjs';
-import { normalizeBikeReg, enrich } from '../scripts/lib/bikereg.mjs';
+import { normalizeBikeReg, enrich, permitKey } from '../scripts/lib/bikereg.mjs';
 import { rangeText } from '../scripts/lib/util.mjs';
 
 const site = JSON.parse(readFileSync(new URL('../content/site.json', import.meta.url)));
@@ -58,4 +58,25 @@ test('BikeReg matching by permit and date conflicts', () => {
   assert.equal(copy.find((r) => r.title === 'Sample Criterium Weekend').registration, 'https://www.bikereg.com/sample-crit-weekend');
   assert.equal(problems.length, 1);
   assert.match(problems[0], /Gravel Classic/);
+});
+
+test('real BikeReg API shapes: permit formats and malformed EventUrl', () => {
+  assert.equal(permitKey('2026-15418'), '15418');
+  assert.equal(permitKey('d5683ddc-12f9-48a8-af9c-0bf79027cf3b:15418'), '15418');
+  assert.equal(permitKey('15303'), '15303');
+  assert.equal(permitKey(''), '');
+
+  const real = normalizeBikeReg({
+    EventId: 73188, EventName: 'Triple D Winter Endurance Race', EventCity: 'Dubuque',
+    EventDate: '/Date(1768626000000-0500)/', EventEndDate: '/Date(1768626000000-0500)/',
+    EventUrl: 'http://www.BikeReg.comhttp://tripledrace.com/', EventPermalink: 'http://www.BikeReg.com/73188',
+    Permit: 'd5683ddc-12f9-48a8-af9c-0bf79027cf3b:15418',
+  });
+  assert.equal(real.url, 'https://www.bikereg.com/73188');
+  assert.equal(real.start, '2026-01-17');
+
+  const r = [{ title: 'Triple D', start: '2026-01-17', permit: '2026-15418' }];
+  enrich(r, [real]);
+  assert.equal(r[0].matchedBy, 'permit');
+  assert.equal(r[0].registration, 'https://www.bikereg.com/73188');
 });

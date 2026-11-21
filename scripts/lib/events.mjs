@@ -54,7 +54,7 @@ export function normalizeEvents(raw, disciplines) {
       stripCancel();
 
       const fullDescription = cleanDescription(e.description || '');
-      const permitMatch = fullDescription.match(/permit\s*(?:#|no\.?|number)?\s*[:#]?\s*(\d{4}-\d{1,6})/i);
+      const permitMatch = fullDescription.match(/permit\s*(?:#|no\.?|number)?\s*[:#]?\s*(\d{4}-\d{1,6}|\d{3,6})\b/i);
       const urls = [...new Set([e.url, ...(fullDescription.match(URL_RE) || [])].filter(Boolean))];
       // The permit is shown separately on the race page, so drop lines that only state it.
       const description = fullDescription.split('\n').filter((l) => !/^\s*(usac\s+)?permit\b[^a-z]*$/i.test(l)).join('\n').trim();

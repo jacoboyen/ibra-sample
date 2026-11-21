@@ -1,11 +1,27 @@
 // BikeReg event search. Runs at build time (on GitHub Actions), never in the
 // visitor's browser, so CORS does not apply.
 //
-// Documented at https://www.bikereg.com/api/EventSearchDoc.aspx. That page lists
-// the query parameters (states, year, permit, startpage, ...) but not the endpoint
-// address or the response fields, so field access below is deliberately tolerant.
+// Endpoint confirmed working (Nov 2026): returns JSON { MatchingEvents, ResultCount }.
+// Fields seen: EventId, EventName, EventDate/EventEndDate ("/Date(ms-0500)/"), EventCity,
+// EventState, EventPermalink, EventUrl, EventWebsite, Permit. Access stays tolerant anyway.
+// Don't switch to the public /events page: it sits behind a Cloudflare bot challenge.
 
 export const BIKEREG_ENDPOINT = process.env.BIKEREG_ENDPOINT || 'https://www.bikereg.com/api/search';
+
+// USA Cycling permits appear in several shapes: "2027-15418" in the calendar, and
+// "15418" or "<guid>:15418" from BikeReg. The trailing number is the stable part.
+export function permitKey(v) {
+  const m = String(v || '').match(/(\d+)\s*$/);
+  return m ? String(Number(m[1])) : '';
+}
+
+// BikeReg's EventUrl is sometimes malformed ("http://www.BikeReg.comhttp://other.site/").
+function bikeregUrl(e, id) {
+  const ok = (u) => /^https?:\/\/[^/]*bikereg\.com\/[^:]+$/i.test(String(u || ''));
+  const url = [pick(e, /^EventPermalink$/i), pick(e, /^EventUrl$/i)].find(ok);
+  if (url) return String(url).replace(/^http:\/\/www\.bikereg\.com/i, 'https://www.bikereg.com');
+  return id ? `https://www.bikereg.com/${id}` : '';
+}
 
 const pick = (obj, ...patterns) => {
   for (const re of patterns) {
@@ -28,15 +44,13 @@ function toYMD(v) {
 
 export function normalizeBikeReg(e) {
   const id = pick(e, /^EventId$/i, /eventid/i, /^id$/i);
-  let url = pick(e, /^EventUrl$/i, /url/i);
-  if (!url && id) url = `https://www.bikereg.com/${id}`;
   return {
     id: String(id || ''),
     name: String(pick(e, /^EventName$/i, /name/i) || ''),
     start: toYMD(pick(e, /^EventDate$/i, /startdate/i, /date/i)),
     end: toYMD(pick(e, /^EventEndDate$/i, /enddate/i)),
     permit: String(pick(e, /permit/i) || '').trim(),
-    url: String(url || ''),
+    url: bikeregUrl(e, id),
     city: String(pick(e, /city/i) || ''),
   };
 }
@@ -71,11 +85,12 @@ function similar(a, b) {
 // Returns a list of problems worth a human look.
 export function enrich(races, bikereg) {
   const problems = [];
-  const byPermit = new Map(bikereg.filter((b) => b.permit).map((b) => [b.permit, b]));
+  const byPermit = new Map(bikereg.filter((b) => permitKey(b.permit)).map((b) => [permitKey(b.permit), b]));
   for (const r of races) {
     let match = null;
     let how = '';
-    if (r.permit && byPermit.has(r.permit)) { match = byPermit.get(r.permit); how = 'permit'; }
+    const key = permitKey(r.permit);
+    if (key && byPermit.has(key)) { match = byPermit.get(key); how = 'permit'; }
     if (!match && r.registration) {
       match = bikereg.find((b) => b.url && b.id && r.registration.includes(b.id)) || null;
       if (match) how = 'link';
