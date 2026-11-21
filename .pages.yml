@@ -1,0 +1,182 @@
+# Pages CMS (https://pagescms.org) editing setup.
+# Board members sign in at app.pagescms.org with their GitHub account and get
+# simple forms for everything below. Saving a form commits to the repo and the
+# site rebuilds automatically within a few minutes.
+#
+# The race calendar is NOT edited here: it comes from the IBRA Google Calendar.
+
+media:
+  input: public/documents
+  output: /documents
+
+content:
+  - name: board
+    label: Board members
+    type: file
+    path: content/board.json
+    fields:
+      - name: next_election
+        label: Next election (optional, e.g. "January 2027")
+        type: string
+      - name: members
+        label: Members
+        type: object
+        list: true
+        fields:
+          - name: name
+            label: Name
+            type: string
+            required: true
+          - name: role
+            label: Role (e.g. President, Treasurer, Director)
+            type: string
+            required: true
+          - name: affiliation
+            label: Club or team (optional)
+            type: string
+          - name: term_start
+            label: Term start year
+            type: string
+          - name: term_end
+            label: Term end year
+            type: string
+
+  - name: documents
+    label: Budget & documents
+    type: file
+    path: content/documents.json
+    fields:
+      - name: documents
+        label: Documents
+        type: object
+        list: true
+        fields:
+          - name: title
+            label: Title (e.g. "Approved operating budget")
+            type: string
+            required: true
+          - name: type
+            label: Type
+            type: select
+            options:
+              values: [Budget, Financial report, Meeting minutes, Bylaws, Policy, Other]
+          - name: year
+            label: Year
+            type: string
+            required: true
+          - name: approved
+            label: Date approved (optional)
+            type: string
+          - name: file
+            label: File (PDF)
+            type: file
+            options:
+              extensions: [pdf, xlsx, docx]
+
+  - name: about
+    label: About page text
+    type: file
+    path: content/about.json
+    fields:
+      - name: intro
+        label: Introduction
+        type: text
+      - name: budget_intro
+        label: Text above the documents list
+        type: text
+
+  - name: promoters
+    label: Promoters page
+    type: file
+    path: content/promoters.json
+    fields:
+      - name: intro
+        label: Introduction
+        type: text
+      - name: fee_note
+        label: Highlighted note (leave empty to hide)
+        type: string
+      - name: response_time
+        label: Reply time note (e.g. "We usually reply within 3 business days")
+        type: string
+      - name: steps
+        label: How it works (steps)
+        type: object
+        list: true
+        fields:
+          - name: title
+            label: Step title
+            type: string
+          - name: text
+            label: Step description
+            type: text
+      - name: resources
+        label: Promoter resources (links)
+        type: object
+        list: true
+        fields:
+          - name: title
+            label: Link text
+            type: string
+          - name: url
+            label: Web address
+            type: string
+          - name: note
+            label: Note (e.g. PDF, External)
+            type: string
+
+  - name: site
+    label: Site settings
+    type: file
+    path: content/site.json
+    fields:
+      - name: name
+        label: Organization name
+        type: string
+      - name: short_name
+        label: Short name
+        type: string
+      - name: description
+        label: Search engine description (1–2 sentences)
+        type: text
+      - name: hero_title
+        label: Home page headline
+        type: string
+      - name: hero_text
+        label: Home page text under the headline
+        type: text
+      - name: email
+        label: Contact email
+        type: string
+      - name: facebook
+        label: Facebook page address
+        type: string
+      - name: start_racing_url
+        label: '"Start racing" button link'
+        type: string
+      - name: results_url
+        label: Results link
+        type: string
+      - name: calendar_ics
+        label: Google Calendar public iCal address
+        type: string
+      - name: calendar_id
+        label: Google Calendar ID
+        type: string
+      - name: bikereg_states
+        label: BikeReg states to search (e.g. IA)
+        type: string
+      - name: timezone
+        label: Time zone
+        type: string
+      - name: disciplines
+        label: Discipline prefixes used in calendar titles
+        type: object
+        list: true
+        fields:
+          - name: prefix
+            label: Prefix (typed before a colon, e.g. CX)
+            type: string
+          - name: label
+            label: Shown as
+            type: string

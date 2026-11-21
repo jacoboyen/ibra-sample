@@ -1,0 +1,25 @@
+{
+  "name": "Iowa Bicycle Racing Association",
+  "short_name": "IBRA",
+  "description": "The Iowa Bicycle Racing Association (IBRA) is the USA Cycling Local Association for Iowa. Find every sanctioned bike race in Iowa: road, criterium, gravel, cyclocross, mountain bike and track.",
+  "hero_title": "Every sanctioned race in Iowa.",
+  "hero_text": "Road, criterium, gravel, cyclocross, mountain bike and track. One calendar, one place for results.",
+  "email": "iowabicycleracing@gmail.com",
+  "facebook": "https://www.facebook.com/iowabicycleracing",
+  "start_racing_url": "https://usacycling.org/memberships-new",
+  "results_url": "https://usacycling.sport80.com/pub/results?state=ia",
+  "calendar_ics": "https://calendar.google.com/calendar/ical/iowabicycleracing%40gmail.com/public/basic.ics",
+  "calendar_id": "iowabicycleracing@gmail.com",
+  "bikereg_states": "IA",
+  "timezone": "America/Chicago",
+  "disciplines": [
+    { "prefix": "RR", "label": "Road" },
+    { "prefix": "CRIT", "label": "Criterium" },
+    { "prefix": "TT", "label": "Time trial" },
+    { "prefix": "STAGE", "label": "Stage race" },
+    { "prefix": "GRAVEL", "label": "Gravel" },
+    { "prefix": "CX", "label": "Cyclocross" },
+    { "prefix": "MTB", "label": "Mountain bike" },
+    { "prefix": "TRACK", "label": "Track" }
+  ]
+}

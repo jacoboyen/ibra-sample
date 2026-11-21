@@ -1,0 +1,82 @@
+name: Build and deploy
+
+on:
+  push:
+    branches: [main]
+  # Every 3 hours: pull the latest Google Calendar and BikeReg data and redeploy.
+  schedule:
+    - cron: "17 */3 * * *"
+  # "Run workflow" button on the Actions tab: refresh the site right now.
+  workflow_dispatch:
+
+permissions:
+  contents: write   # save season data back to the repo
+  pages: write
+  id-token: write
+  issues: write     # open an issue when the calendar and BikeReg disagree
+
+concurrency:
+  group: pages
+  cancel-in-progress: false
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+
+      - id: pages
+        uses: actions/configure-pages@v5
+
+      - name: Test
+        run: npm test
+
+      - name: Build
+        run: npm run build
+        env:
+          SITE_URL: ${{ vars.SITE_URL || steps.pages.outputs.base_url }}
+
+      # Saving season data keeps past seasons intact and, together with the monthly
+      # heartbeat file, keeps the repo active so GitHub never pauses this schedule.
+      - name: Save season data
+        run: |
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git add data/
+          if ! git diff --cached --quiet; then
+            git commit -m "Update race data"
+            git pull --rebase --quiet
+            git push
+          fi
+
+      - name: Report calendar problems
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: |
+          if [ -s .cache/sync-report.md ]; then
+            open=$(gh issue list --label "calendar-sync" --state open --json number --jq '.[0].number')
+            if [ -z "$open" ]; then
+              gh label create calendar-sync --color FFCD00 --description "Automatic calendar/BikeReg check" 2>/dev/null || true
+              gh issue create --label calendar-sync --title "Race calendar needs a look" --body-file .cache/sync-report.md
+            else
+              gh issue edit "$open" --body-file .cache/sync-report.md
+            fi
+          fi
+
+      - uses: actions/upload-pages-artifact@v3
+        with:
+          path: dist
+
+  deploy:
+    needs: build
+    runs-on: ubuntu-latest
+    environment:
+      name: github-pages
+      url: ${{ steps.deployment.outputs.page_url }}
+    steps:
+      - id: deployment
+        uses: actions/deploy-pages@v4

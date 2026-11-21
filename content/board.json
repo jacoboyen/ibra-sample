@@ -1,0 +1,12 @@
+{
+  "next_election": "",
+  "members": [
+    { "name": "Austin Neal", "role": "President", "term_start": "", "term_end": "" },
+    { "name": "Jason Simpson", "role": "Treasurer", "term_start": "", "term_end": "" },
+    { "name": "Boyd Burnham", "role": "Secretary / Race calendar", "term_start": "", "term_end": "" },
+    { "name": "Wayne Fett", "role": "Director", "term_start": "", "term_end": "" },
+    { "name": "Larry Howe", "role": "Director", "term_start": "", "term_end": "" },
+    { "name": "Noah Marcus", "role": "Director", "term_start": "", "term_end": "" },
+    { "name": "Jacob Oyen", "role": "Director", "term_start": "", "term_end": "" }
+  ]
+}
