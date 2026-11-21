@@ -50,6 +50,16 @@ function parseWhen(prop, timeZone) {
   return { date: ymd, allDay: false, midnight: t[2] === '00' && t[3] === '00' };
 }
 
+// Latest date a repeating event (RRULE) can reach, as YYYY-MM-DD, or '9999-12-31' if it
+// never ends. COUNT is estimated generously (31-day months), which only errs toward warning.
+export function seriesEnd(start, rrule) {
+  const rule = Object.fromEntries(String(rrule).split(';').map((kv) => kv.split('=')));
+  if (rule.UNTIL) return `${rule.UNTIL.slice(0, 4)}-${rule.UNTIL.slice(4, 6)}-${rule.UNTIL.slice(6, 8)}`;
+  if (!rule.COUNT) return '9999-12-31';
+  const step = { DAILY: 1, WEEKLY: 7, MONTHLY: 31, YEARLY: 366 }[rule.FREQ] || 366;
+  return addDays(start, step * (Number(rule.INTERVAL) || 1) * Number(rule.COUNT));
+}
+
 export function parseICS(text, { timeZone = 'America/Chicago' } = {}) {
   const out = [];
   let skippedRecurring = 0;
@@ -75,6 +85,7 @@ export function parseICS(text, { timeZone = 'America/Chicago' } = {}) {
       start: start.date,
       end,
       recurring: Boolean(p.RRULE),
+      rrule: p.RRULE ? p.RRULE.value : '',
     });
   }
   return { events: out, skippedRecurring };

@@ -1,7 +1,7 @@
 import { test } from 'node:test';
 import assert from 'node:assert/strict';
 import { readFileSync } from 'node:fs';
-import { parseICS } from '../scripts/lib/ics.mjs';
+import { parseICS, seriesEnd } from '../scripts/lib/ics.mjs';
 import { normalizeEvents, shortLocation } from '../scripts/lib/events.mjs';
 import { normalizeBikeReg, enrich, permitKey } from '../scripts/lib/bikereg.mjs';
 import { rangeText } from '../scripts/lib/util.mjs';
@@ -79,4 +79,25 @@ test('real BikeReg API shapes: permit formats and malformed EventUrl', () => {
   enrich(r, [real]);
   assert.equal(r[0].matchedBy, 'permit');
   assert.equal(r[0].registration, 'https://www.bikereg.com/73188');
+});
+
+test('BikeReg logo URL and common-word false matches', () => {
+  const b = normalizeBikeReg({ EventId: 1, EventName: 'Iowa Valley RAGBRAI Charter 2026', EventDate: '2026-07-18', EventLogo: '/BR/VirtualImages/EventLogos/abc.png' });
+  assert.equal(b.logo, 'https://www.bikereg.com/BR/VirtualImages/EventLogos/abc.png');
+  assert.equal(normalizeBikeReg({ EventId: 2 }).logo, '');
+
+  const r = [{ title: 'Iowa Games TT', start: '2026-07-18', permit: '' }];
+  enrich(r, [b]);
+  assert.equal(r[0].matchedBy, undefined);
+
+  const ok = [{ title: 'Sugar Bottom Scramble', start: '2026-08-23', permit: '' }];
+  enrich(ok, [normalizeBikeReg({ EventId: 3, EventName: 'Sugar Bottom Scramble', EventDate: '2026-08-23', EventPermalink: 'http://www.BikeReg.com/75000', EventLogo: '/x.png' })]);
+  assert.equal(ok[0].bikeregUrl, 'https://www.bikereg.com/75000');
+  assert.equal(ok[0].logo, 'https://www.bikereg.com/x.png');
+});
+
+test('repeating event series end dates', () => {
+  assert.equal(seriesEnd('2020-09-22', 'FREQ=WEEKLY;WKST=SU;UNTIL=20201027;BYDAY=TU'), '2020-10-27');
+  assert.ok(seriesEnd('2014-05-06', 'FREQ=MONTHLY;COUNT=4;BYDAY=1TU') < '2015-01-01');
+  assert.equal(seriesEnd('2026-04-16', 'FREQ=MONTHLY;BYDAY=3TH'), '9999-12-31');
 });

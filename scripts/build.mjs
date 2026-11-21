@@ -21,7 +21,7 @@ import { readFile, writeFile, mkdir, rm, cp, readdir } from 'node:fs/promises';
 import { existsSync } from 'node:fs';
 import { join, dirname } from 'node:path';
 import { fileURLToPath } from 'node:url';
-import { parseICS } from './lib/ics.mjs';
+import { parseICS, seriesEnd } from './lib/ics.mjs';
 import { normalizeEvents } from './lib/events.mjs';
 import { fetchBikeReg, enrich, normalizeBikeReg } from './lib/bikereg.mjs';
 import { makeRenderer } from './lib/render.mjs';
@@ -32,7 +32,8 @@ const dist = join(root, 'dist');
 const readJSON = async (p, fallback) => (existsSync(join(root, p)) ? JSON.parse(await readFile(join(root, p), 'utf8')) : fallback);
 const log = (...a) => console.log('•', ...a);
 const warnings = [];
-const warn = (m) => { warnings.push(m); console.warn('!', m); };
+// On GitHub Actions, "::warning::" also shows the message on the run's summary page.
+const warn = (m) => { warnings.push(m); console.warn(process.env.GITHUB_ACTIONS ? `::warning::${m}` : `! ${m}`); };
 
 const site = await readJSON('content/site.json');
 const board = await readJSON('content/board.json', { members: [] });
@@ -56,8 +57,10 @@ try {
         if (!res.ok) throw new Error(`HTTP ${res.status}`);
         return res.text();
       })();
-  const { events, skippedRecurring } = parseICS(icsText, { timeZone: site.timezone });
-  if (skippedRecurring) warn(`${skippedRecurring} repeating calendar event(s) found; only the first date of each is shown. Enter races as single events.`);
+  const { events } = parseICS(icsText, { timeZone: site.timezone });
+  // Old repeating events can't affect frozen past seasons, so only flag ones that reach this season.
+  const repeating = events.filter((e) => e.recurring && seriesEnd(e.start, e.rrule) >= `${thisYear}-01-01`);
+  if (repeating.length) warn(`Repeating calendar event(s) found; only the first date of each is shown. Enter each date as its own event: ${repeating.map((e) => `"${e.summary}" (from ${e.start})`).join(', ')}.`);
   live = normalizeEvents(events, site.disciplines);
   log(`Calendar: ${live.length} events`);
 } catch (err) {
@@ -104,7 +107,9 @@ if (process.env.SKIP_BIKEREG !== '1' && active.length) {
     warn(`BikeReg lookup failed (${err.message}). Keeping registration links from the last successful run.`);
     for (const r of active) {
       const prev = (saved.get(r.year) || []).find((p) => p.uid === r.uid);
-      if (prev && prev.registration && !r.registration) { r.registration = prev.registration; r.matchedBy = prev.matchedBy; }
+      if (prev && prev.registration && !r.registration) {
+        Object.assign(r, { registration: prev.registration, matchedBy: prev.matchedBy, bikeregUrl: prev.bikeregUrl || '', logo: prev.logo || '' });
+      }
     }
   }
 }
@@ -131,7 +136,6 @@ await rm(dist, { recursive: true, force: true });
 await mkdir(dist, { recursive: true });
 await cp(join(root, 'public'), dist, { recursive: true });
 await cp(join(root, 'src/styles.css'), join(dist, 'styles.css'));
-await cp(join(root, 'src/filters.js'), join(dist, 'filters.js'));
 
 const pages = [];
 const page = async (path, html, { sitemap = true } = {}) => {

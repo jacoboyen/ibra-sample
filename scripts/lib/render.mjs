@@ -103,14 +103,18 @@ ${footer()}
     if (r.cancelled) side = `<span class="pill pill-cancel">Cancelled</span>`;
     else if (past || isPast(r)) side = `<a href="${esc(site.results_url)}">Results ↗</a>`;
     else if (r.registration) side = `<a href="${esc(r.registration)}" aria-label="Register for ${esc(r.title)} on BikeReg">Register ↗</a>`;
-    return `<div class="event${r.cancelled ? ' is-cancelled' : ''}" data-kind="${esc(r.kind)}">
+    // Races matched to BikeReg link straight to the BikeReg event; others to their page here.
+    const href = r.bikeregUrl ? esc(r.bikeregUrl) : u(r.path);
+    const logo = r.logo ? `<img class="event-logo" src="${esc(r.logo)}" alt="" width="56" height="56" loading="lazy" onerror="this.remove()">` : '';
+    return `<div class="event${r.cancelled ? ' is-cancelled' : ''}">
 ${dates(r)}
 <div class="event-body">
-<a class="event-title" href="${u(r.path)}">${esc(r.title)}</a>
+${logo}<div class="event-text">
+<a class="event-title" href="${href}">${esc(r.title)}</a>
 <div class="event-meta"><span class="sr-date">${esc(rangeText(r.start, r.end))}</span>${meta(r) ? ' · ' + esc(meta(r)) : ''}</div>
 </div>
-<span class="pill">${esc(r.kind)}</span>
-<div class="event-side">${side}</div>
+</div>
+${r.kind !== 'Other' ? `<span class="pill">${esc(r.kind)}</span>\n` : ''}<div class="event-side">${side}</div>
 </div>`;
   }
 
@@ -123,23 +127,13 @@ ${dates(r)}
       g.races.push(r);
     }
     return groups
-      .map((g) => `<section class="month" data-month>
+      .map((g) => `<section class="month">
 <h2 class="display">${esc(g.label)}</h2>
 ${g.races.map((r) => eventRow(r, opts)).join('\n')}
 </section>`)
       .join('\n');
   }
 
-  function filterBar(races) {
-    const kinds = [...new Set(races.map((r) => r.kind))];
-    const order = site.disciplines.map((d) => d.label).concat('Other');
-    kinds.sort((a, b) => order.indexOf(a) - order.indexOf(b));
-    if (kinds.length < 2) return '';
-    return `<div class="filters" role="group" aria-label="Filter by discipline" data-filters hidden>
-<button type="button" data-value="all" aria-pressed="true">All</button>
-${kinds.map((k) => `<button type="button" data-value="${esc(k)}" aria-pressed="false">${esc(k)}</button>`).join('\n')}
-</div>`;
-  }
 
   // ---------- structured data ----------
   const orgLd = {
@@ -169,7 +163,7 @@ ${kinds.map((k) => `<button type="button" data-value="${esc(k)}" aria-pressed="f
       eventAttendanceMode: 'https://schema.org/OfflineEventAttendanceMode',
       url: abs(r.path),
       image: [abs('/images/og-default.png')],
-      description: (r.description || `${r.kind} bicycle race in ${r.city || 'Iowa'}.`).slice(0, 500),
+      description: (r.description || `${r.kind === 'Other' ? 'Bicycle' : r.kind} race in ${r.city || 'Iowa'}.`).slice(0, 500),
       organizer: { '@type': 'Organization', name: site.name, url: abs('/') },
     };
     if (r.location) {
@@ -263,18 +257,15 @@ ${list.length ? list.map((r) => eventRow(r)).join('\n') : '<p class="empty">No u
 </div>
 <div class="actions" style="margin:0">${subscribeLinks()}</div>
 </div>
-${filterBar(upcoming)}
 </div></section>
 <div class="wrap">
 ${upcoming.length ? monthGroups(upcoming) : '<p class="empty">No upcoming races are on the calendar yet. Check back soon.</p>'}
-<p class="empty" data-empty-filter hidden>No upcoming races in this discipline.</p>
 <section class="section">
 <h2 class="display" style="font-size:34px">Past seasons</h2>
 ${pastSeasons.length ? `<p class="subnav">${pastSeasons.map((y) => `<a href="${u(`/calendar/${y}/`)}">${y}</a>`).join(' ')}</p>` : '<p class="small">Past seasons will be listed here.</p>'}
 <p class="small">Missing a race? <a href="${u('/promoters/')}">Request a date</a>.</p>
 </section>
-</div>
-<script src="${u('/filters.js')}?v=${assetVersion}" defer></script>`;
+</div>`;
     return layout({ title: 'Iowa bike race calendar', description: `Upcoming USA Cycling sanctioned bicycle races in Iowa: road, criterium, gravel, cyclocross, mountain bike and track.`, path: '/calendar/', body, current: '/calendar/' });
   }
 
@@ -284,23 +275,21 @@ ${pastSeasons.length ? `<p class="subnav">${pastSeasons.map((y) => `<a href="${u
 <p class="breadcrumb"><a href="${u('/calendar/')}">Calendar</a> / ${year}</p>
 <h1 class="display">${year} season</h1>
 <p class="lede">${races.length} race${races.length === 1 ? '' : 's'} on the ${year} Iowa calendar.</p>
-${filterBar(races)}
 </div></section>
 <div class="wrap">
 ${monthGroups(races)}
-<p class="empty" data-empty-filter hidden>No races in this discipline.</p>
 ${others.length ? `<section class="section"><h2 class="display" style="font-size:34px">Other seasons</h2><p class="subnav">${others.map((y) => `<a href="${u(y >= yearOf(today) ? '/calendar/' : `/calendar/${y}/`)}">${y}</a>`).join(' ')}</p></section>` : ''}
-</div>
-<script src="${u('/filters.js')}?v=${assetVersion}" defer></script>`;
+</div>`;
     return layout({ title: `${year} Iowa bike race calendar`, description: `All ${races.length} sanctioned bicycle races on the ${year} Iowa calendar.`, path: `/calendar/${year}/`, body, current: '/calendar/' });
   }
 
   function race(r) {
     const past = isPast(r);
+    const tags = (r.kind !== 'Other' ? `<span class="pill">${esc(r.kind)}</span>` : '') + (r.cancelled ? '<span class="pill pill-cancel">Cancelled</span>' : '');
     const facts = [
       ['When', rangeText(r.start, r.end)],
       ['Where', r.location || r.city],
-      ['Discipline', r.kind],
+      ['Discipline', r.kind !== 'Other' ? r.kind : ''],
       ['USAC permit', r.permit],
     ].filter(([, v]) => v);
     const mapLink = r.location ? `https://www.google.com/maps/search/?api=1&query=${encodeURIComponent(r.location)}` : '';
@@ -308,8 +297,7 @@ ${others.length ? `<section class="section"><h2 class="display" style="font-size
 <p class="breadcrumb"><a href="${u('/calendar/')}">Calendar</a> / <a href="${u(r.year >= yearOf(today) ? '/calendar/' : `/calendar/${r.year}/`)}">${r.year}</a></p>
 <div class="race-head">
 <div class="main">
-<p style="margin:0 0 16px;display:flex;gap:8px;flex-wrap:wrap"><span class="pill">${esc(r.kind)}</span>${r.cancelled ? '<span class="pill pill-cancel">Cancelled</span>' : ''}</p>
-<h1 class="display">${esc(r.title)}</h1>
+${tags ? `<p style="margin:0 0 16px;display:flex;gap:8px;flex-wrap:wrap">${tags}</p>\n` : ''}<h1 class="display">${esc(r.title)}</h1>
 <p class="lede">${esc(dowRange(r.start, r.end))}, ${esc(rangeText(r.start, r.end))}${r.city ? ' · ' + esc(r.city) : ''}</p>
 <div class="actions">
 ${!past && !r.cancelled && r.registration ? `<a class="btn btn-dark" href="${esc(r.registration)}">Register on BikeReg ↗</a>` : ''}
