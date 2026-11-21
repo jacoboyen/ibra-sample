@@ -1,7 +1,7 @@
 import { test } from 'node:test';
 import assert from 'node:assert/strict';
 import { readFileSync } from 'node:fs';
-import { parseICS } from '../scripts/lib/ics.mjs';
+import { parseICS, seriesEnd } from '../scripts/lib/ics.mjs';
 import { normalizeEvents, shortLocation } from '../scripts/lib/events.mjs';
 import { normalizeBikeReg, enrich, permitKey } from '../scripts/lib/bikereg.mjs';
 import { rangeText } from '../scripts/lib/util.mjs';
@@ -94,4 +94,10 @@ test('BikeReg logo URL and common-word false matches', () => {
   enrich(ok, [normalizeBikeReg({ EventId: 3, EventName: 'Sugar Bottom Scramble', EventDate: '2026-08-23', EventPermalink: 'http://www.BikeReg.com/75000', EventLogo: '/x.png' })]);
   assert.equal(ok[0].bikeregUrl, 'https://www.bikereg.com/75000');
   assert.equal(ok[0].logo, 'https://www.bikereg.com/x.png');
+});
+
+test('repeating event series end dates', () => {
+  assert.equal(seriesEnd('2020-09-22', 'FREQ=WEEKLY;WKST=SU;UNTIL=20201027;BYDAY=TU'), '2020-10-27');
+  assert.ok(seriesEnd('2014-05-06', 'FREQ=MONTHLY;COUNT=4;BYDAY=1TU') < '2015-01-01');
+  assert.equal(seriesEnd('2026-04-16', 'FREQ=MONTHLY;BYDAY=3TH'), '9999-12-31');
 });

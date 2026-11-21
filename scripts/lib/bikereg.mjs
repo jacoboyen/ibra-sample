@@ -67,7 +67,9 @@ export function normalizeBikeReg(e) {
 export async function fetchBikeReg({ states, years }) {
   const all = [];
   for (const year of years) {
-    for (let startpage = 1; startpage < 1000; startpage += 100) {
+    // startpage is a 0-based page number with 100 events per page (checked Nov 2026:
+    // startpage=1 is the second page, so starting there silently returned nothing for Iowa).
+    for (let startpage = 0; startpage < 20; startpage++) {
       const qs = new URLSearchParams({ states, year: String(year), startpage: String(startpage) });
       const res = await fetch(`${BIKEREG_ENDPOINT}?${qs}`, { headers: { Accept: 'application/json', 'User-Agent': 'Mozilla/5.0 (compatible; static-site-build/1.0)' } });
       if (!res.ok) throw new Error(`BikeReg HTTP ${res.status} for ${year}`);
@@ -78,7 +80,8 @@ export async function fetchBikeReg({ states, years }) {
       if (list.length < 100) break;
     }
   }
-  return all.map(normalizeBikeReg);
+  const seen = new Set();
+  return all.map(normalizeBikeReg).filter((e) => !e.id || (!seen.has(e.id) && seen.add(e.id)));
 }
 
 // Words too common in Iowa race names to count as evidence of a match

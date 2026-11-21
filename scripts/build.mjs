@@ -21,7 +21,7 @@ import { readFile, writeFile, mkdir, rm, cp, readdir } from 'node:fs/promises';
 import { existsSync } from 'node:fs';
 import { join, dirname } from 'node:path';
 import { fileURLToPath } from 'node:url';
-import { parseICS } from './lib/ics.mjs';
+import { parseICS, seriesEnd } from './lib/ics.mjs';
 import { normalizeEvents } from './lib/events.mjs';
 import { fetchBikeReg, enrich, normalizeBikeReg } from './lib/bikereg.mjs';
 import { makeRenderer } from './lib/render.mjs';
@@ -57,8 +57,10 @@ try {
         if (!res.ok) throw new Error(`HTTP ${res.status}`);
         return res.text();
       })();
-  const { events, skippedRecurring } = parseICS(icsText, { timeZone: site.timezone });
-  if (skippedRecurring) warn(`${skippedRecurring} repeating calendar event(s) found; only the first date of each is shown. Enter races as single events.`);
+  const { events } = parseICS(icsText, { timeZone: site.timezone });
+  // Old repeating events can't affect frozen past seasons, so only flag ones that reach this season.
+  const repeating = events.filter((e) => e.recurring && seriesEnd(e.start, e.rrule) >= `${thisYear}-01-01`);
+  if (repeating.length) warn(`Repeating calendar event(s) found; only the first date of each is shown. Enter each date as its own event: ${repeating.map((e) => `"${e.summary}" (from ${e.start})`).join(', ')}.`);
   live = normalizeEvents(events, site.disciplines);
   log(`Calendar: ${live.length} events`);
 } catch (err) {

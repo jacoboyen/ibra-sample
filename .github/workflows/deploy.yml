@@ -58,14 +58,17 @@ jobs:
         env:
           GH_TOKEN: ${{ github.token }}
         run: |
+          open=$(gh issue list --label "calendar-sync" --state open --json number --jq '.[0].number')
           if [ -s .cache/sync-report.md ]; then
-            open=$(gh issue list --label "calendar-sync" --state open --json number --jq '.[0].number')
             if [ -z "$open" ]; then
               gh label create calendar-sync --color FFCD00 --description "Automatic calendar/BikeReg check" 2>/dev/null || true
               gh issue create --label calendar-sync --title "Race calendar needs a look" --body-file .cache/sync-report.md
             else
               gh issue edit "$open" --body-file .cache/sync-report.md
             fi
+          elif [ -n "$open" ]; then
+            # Nothing to report any more: close the issue so it doesn't linger.
+            gh issue close "$open" --comment "The latest build found no calendar problems, so this is resolved."
           fi
 
       - uses: actions/upload-pages-artifact@v3
