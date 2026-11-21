@@ -32,7 +32,8 @@ const dist = join(root, 'dist');
 const readJSON = async (p, fallback) => (existsSync(join(root, p)) ? JSON.parse(await readFile(join(root, p), 'utf8')) : fallback);
 const log = (...a) => console.log('•', ...a);
 const warnings = [];
-const warn = (m) => { warnings.push(m); console.warn('!', m); };
+// On GitHub Actions, "::warning::" also shows the message on the run's summary page.
+const warn = (m) => { warnings.push(m); console.warn(process.env.GITHUB_ACTIONS ? `::warning::${m}` : `! ${m}`); };
 
 const site = await readJSON('content/site.json');
 const board = await readJSON('content/board.json', { members: [] });
@@ -104,7 +105,9 @@ if (process.env.SKIP_BIKEREG !== '1' && active.length) {
     warn(`BikeReg lookup failed (${err.message}). Keeping registration links from the last successful run.`);
     for (const r of active) {
       const prev = (saved.get(r.year) || []).find((p) => p.uid === r.uid);
-      if (prev && prev.registration && !r.registration) { r.registration = prev.registration; r.matchedBy = prev.matchedBy; }
+      if (prev && prev.registration && !r.registration) {
+        Object.assign(r, { registration: prev.registration, matchedBy: prev.matchedBy, bikeregUrl: prev.bikeregUrl || '', logo: prev.logo || '' });
+      }
     }
   }
 }
@@ -131,7 +134,6 @@ await rm(dist, { recursive: true, force: true });
 await mkdir(dist, { recursive: true });
 await cp(join(root, 'public'), dist, { recursive: true });
 await cp(join(root, 'src/styles.css'), join(dist, 'styles.css'));
-await cp(join(root, 'src/filters.js'), join(dist, 'filters.js'));
 
 const pages = [];
 const page = async (path, html, { sitemap = true } = {}) => {

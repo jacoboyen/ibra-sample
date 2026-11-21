@@ -15,6 +15,14 @@ export function permitKey(v) {
   return m ? String(Number(m[1])) : '';
 }
 
+// EventLogo is a site-relative path like "/BR/VirtualImages/EventLogos/<id>.png".
+function bikeregLogo(e) {
+  const v = String(pick(e, /^EventLogo$/i) || '').trim();
+  if (!v) return '';
+  if (/^https?:\/\//i.test(v)) return v.replace(/^http:/i, 'https:');
+  return `https://www.bikereg.com${v.startsWith('/') ? '' : '/'}${v}`;
+}
+
 // BikeReg's EventUrl is sometimes malformed ("http://www.BikeReg.comhttp://other.site/").
 function bikeregUrl(e, id) {
   const ok = (u) => /^https?:\/\/[^/]*bikereg\.com\/[^:]+$/i.test(String(u || ''));
@@ -51,6 +59,7 @@ export function normalizeBikeReg(e) {
     end: toYMD(pick(e, /^EventEndDate$/i, /enddate/i)),
     permit: String(pick(e, /permit/i) || '').trim(),
     url: bikeregUrl(e, id),
+    logo: bikeregLogo(e),
     city: String(pick(e, /city/i) || ''),
   };
 }
@@ -60,8 +69,9 @@ export async function fetchBikeReg({ states, years }) {
   for (const year of years) {
     for (let startpage = 1; startpage < 1000; startpage += 100) {
       const qs = new URLSearchParams({ states, year: String(year), startpage: String(startpage) });
-      const res = await fetch(`${BIKEREG_ENDPOINT}?${qs}`, { headers: { Accept: 'application/json' } });
-      if (!res.ok) throw new Error(`BikeReg ${res.status} for ${year}`);
+      const res = await fetch(`${BIKEREG_ENDPOINT}?${qs}`, { headers: { Accept: 'application/json', 'User-Agent': 'Mozilla/5.0 (compatible; static-site-build/1.0)' } });
+      if (!res.ok) throw new Error(`BikeReg HTTP ${res.status} for ${year}`);
+      if (!/json/i.test(res.headers.get('content-type') || '')) throw new Error(`BikeReg returned ${res.headers.get('content-type') || 'no content type'} instead of JSON for ${year} (likely a bot check)`);
       const json = await res.json();
       const list = json.MatchingEvents || json.matchingEvents || [];
       all.push(...list);
@@ -71,7 +81,10 @@ export async function fetchBikeReg({ states, years }) {
   return all.map(normalizeBikeReg);
 }
 
-const words = (s) => new Set(s.toLowerCase().replace(/[^a-z0-9 ]/g, ' ').split(/\s+/).filter((w) => w.length > 2));
+// Words too common in Iowa race names to count as evidence of a match
+// (e.g. "Iowa Games TT" must not match "Iowa Valley RAGBRAI Charter").
+const STOP = new Set(['iowa', 'race', 'races', 'the', 'and', 'series']);
+const words = (s) => new Set(s.toLowerCase().replace(/(\w)-(\w)/g, '$1$2').replace(/[^a-z0-9 ]/g, ' ').split(/\s+/).filter((w) => w.length > 2 && !STOP.has(w) && !/^\d+$/.test(w)));
 function similar(a, b) {
   const A = words(a), B = words(b);
   if (!A.size || !B.size) return 0;
@@ -101,6 +114,8 @@ export function enrich(races, bikereg) {
     }
     if (!match) continue;
     r.registration = match.url || r.registration;
+    r.bikeregUrl = match.url || '';
+    r.logo = match.logo || '';
     r.bikeregName = match.name;
     r.matchedBy = how;
     if (match.start && match.start !== r.start) {

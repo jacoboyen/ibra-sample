@@ -80,3 +80,18 @@ test('real BikeReg API shapes: permit formats and malformed EventUrl', () => {
   assert.equal(r[0].matchedBy, 'permit');
   assert.equal(r[0].registration, 'https://www.bikereg.com/73188');
 });
+
+test('BikeReg logo URL and common-word false matches', () => {
+  const b = normalizeBikeReg({ EventId: 1, EventName: 'Iowa Valley RAGBRAI Charter 2026', EventDate: '2026-07-18', EventLogo: '/BR/VirtualImages/EventLogos/abc.png' });
+  assert.equal(b.logo, 'https://www.bikereg.com/BR/VirtualImages/EventLogos/abc.png');
+  assert.equal(normalizeBikeReg({ EventId: 2 }).logo, '');
+
+  const r = [{ title: 'Iowa Games TT', start: '2026-07-18', permit: '' }];
+  enrich(r, [b]);
+  assert.equal(r[0].matchedBy, undefined);
+
+  const ok = [{ title: 'Sugar Bottom Scramble', start: '2026-08-23', permit: '' }];
+  enrich(ok, [normalizeBikeReg({ EventId: 3, EventName: 'Sugar Bottom Scramble', EventDate: '2026-08-23', EventPermalink: 'http://www.BikeReg.com/75000', EventLogo: '/x.png' })]);
+  assert.equal(ok[0].bikeregUrl, 'https://www.bikereg.com/75000');
+  assert.equal(ok[0].logo, 'https://www.bikereg.com/x.png');
+});
