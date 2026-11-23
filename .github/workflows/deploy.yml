@@ -78,9 +78,98 @@ jobs:
   deploy:
     needs: build
     runs-on: ubuntu-latest
+    outputs:
+      page_url: ${{ steps.deployment.outputs.page_url }}
     environment:
       name: github-pages
       url: ${{ steps.deployment.outputs.page_url }}
     steps:
       - id: deployment
         uses: actions/deploy-pages@v4
+
+  # WCAG 2.2 AA check of the live site with axe-core. Runs after deploy, so it never
+  # blocks a site update; problems go to an "accessibility" issue instead.
+  accessibility:
+    needs: deploy
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+
+      # Test tools only. The site build itself still has no dependencies.
+      - name: Install test tools
+        run: |
+          npm install --no-save --no-package-lock playwright@1.63.0 axe-core@4.14.0
+          npx playwright install --with-deps chromium
+
+      - name: Check WCAG 2.2 AA
+        continue-on-error: true
+        run: node scripts/a11y.mjs "${{ needs.deploy.outputs.page_url }}"
+
+      - name: Report accessibility problems
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: |
+          if [ ! -f .cache/a11y-report.md ]; then
+            echo "::warning::The accessibility check did not run to completion; see the step above."
+            exit 0
+          fi
+          open=$(gh issue list --label "accessibility" --state open --json number --jq '.[0].number')
+          if [ -s .cache/a11y-report.md ]; then
+            if [ -z "$open" ]; then
+              gh label create accessibility --color 8EB9FC --description "Automatic WCAG 2.2 AA check" 2>/dev/null || true
+              gh issue create --label accessibility --title "Accessibility problems found (WCAG 2.2 AA)" --body-file .cache/a11y-report.md
+            else
+              gh issue edit "$open" --body-file .cache/a11y-report.md
+            fi
+          elif [ -n "$open" ]; then
+            gh issue close "$open" --comment "The latest WCAG 2.2 AA check passed, so this is resolved."
+          fi
+
+  # Lighthouse performance check of the live site. Results go to the run summary and,
+  # when the deploy came from merging a pull request, a comment on that pull request.
+  lighthouse:
+    needs: deploy
+    runs-on: ubuntu-latest
+    permissions:
+      contents: read
+      pull-requests: write
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+
+      # Test tool only; uses the Chrome already installed on GitHub's runners.
+      - name: Install Lighthouse
+        run: npm install --no-save --no-package-lock lighthouse@13.6.0
+
+      - name: Run Lighthouse
+        run: node scripts/lighthouse.mjs "${{ needs.deploy.outputs.page_url }}"
+
+      - name: Post results
+        if: always()
+        env:
+          GH_TOKEN: ${{ github.token }}
+          GH_REPO: ${{ github.repository }}
+          EVENT: ${{ github.event_name }}
+        run: |
+          if [ ! -s .cache/lighthouse-report.md ]; then
+            echo "::warning::Lighthouse produced no report; see the step above."
+            exit 0
+          fi
+          { echo "Post-deploy check of commit ${GITHUB_SHA::7}."; echo; cat .cache/lighthouse-report.md; } > .cache/lighthouse-comment.md
+          cat .cache/lighthouse-comment.md >> "$GITHUB_STEP_SUMMARY"
+          # Only pushes come from a merge; scheduled and manual runs would re-comment on an old PR.
+          if [ "$EVENT" = "push" ]; then
+            pr=$(gh api "repos/$GH_REPO/commits/$GITHUB_SHA/pulls" --jq '.[0].number // empty')
+            if [ -n "$pr" ]; then
+              gh pr comment "$pr" --body-file .cache/lighthouse-comment.md
+            else
+              echo "This commit didn't come from a pull request (e.g. a Pages CMS edit); results are in the run summary only."
+            fi
+          fi

@@ -38,12 +38,40 @@ npm test               # parser and matching tests
 npm run build:sample   # build from test fixtures (no network needed)
 npm run build          # build from the live Google Calendar and BikeReg
 npm run serve          # preview dist/ at http://localhost:8080
+npm run test:a11y      # WCAG 2.2 AA check of the running preview (see Accessibility)
+npm run test:perf      # Lighthouse performance check of the running preview (see Performance)
 ```
 
 ## Known assumptions to check after the first live run
 
 - **BikeReg** (checked Nov 2026): `https://www.bikereg.com/api/search?states=IA&year=YYYY` returns JSON with `EventId`, `EventName`, `EventDate`, `EventPermalink` and `Permit`. About half of Iowa events carry a permit. BikeReg formats it as `15418` or `<id>:15418`, so matching uses the trailing number: `Permit: 2027-15418` in the calendar matches either. The public `/events` page is behind a Cloudflare bot check and can't be used. Override the endpoint with `BIKEREG_ENDPOINT` if it ever moves.
 - **Permit matching** needs the permit number in the calendar description and in BikeReg. Without it, the build falls back to matching the same start date plus a similar name.
+
+## Accessibility
+
+After every deploy, the `accessibility` job checks the live site against WCAG 2.2 AA with [axe-core](https://github.com/dequelabs/axe-core). It tests one page of each kind (home, calendar, a past season, an upcoming and a past race, about, promoters, 404) at desktop and phone widths. If anything fails, it opens or updates an issue labelled `accessibility`, and closes the issue once the check passes. It never blocks a deploy.
+
+To run it locally (the test tools aren't needed for the build, so they aren't in `package.json`):
+
+```bash
+npm install --no-save --no-package-lock playwright@1.63.0 axe-core@4.14.0
+npx playwright install chromium
+npm run build && npm run serve      # in one terminal
+npm run test:a11y                   # in another
+```
+
+Automated checks catch roughly a third to half of WCAG problems. Keyboard use, screen-reader flow and wording still need a person to check now and then.
+
+## Performance
+
+After every deploy, the `lighthouse` job runs [Lighthouse](https://developer.chrome.com/docs/lighthouse) on the live home page and calendar, on mobile and desktop, and reports the median of 3 runs: score, LCP, FCP, TBT, CLS, Speed Index and page weight. Results appear on the workflow run's summary page. When the deploy came from merging a pull request, they're also posted as a comment on that pull request. Scheduled runs and Pages CMS edits have no pull request, so their results are only in the run summary. The check reports scores and never blocks a deploy.
+
+To run it locally against `npm run serve`:
+
+```bash
+npm install --no-save --no-package-lock lighthouse@13.6.0
+npm run test:perf
+```
 
 ## SEO and AI crawlers
 
