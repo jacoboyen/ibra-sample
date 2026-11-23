@@ -78,9 +78,53 @@ jobs:
   deploy:
     needs: build
     runs-on: ubuntu-latest
+    outputs:
+      page_url: ${{ steps.deployment.outputs.page_url }}
     environment:
       name: github-pages
       url: ${{ steps.deployment.outputs.page_url }}
     steps:
       - id: deployment
         uses: actions/deploy-pages@v4
+
+  # WCAG 2.2 AA check of the live site with axe-core. Runs after deploy, so it never
+  # blocks a site update; problems go to an "accessibility" issue instead.
+  accessibility:
+    needs: deploy
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+
+      # Test tools only. The site build itself still has no dependencies.
+      - name: Install test tools
+        run: |
+          npm install --no-save --no-package-lock playwright@1.63.0 axe-core@4.14.0
+          npx playwright install --with-deps chromium
+
+      - name: Check WCAG 2.2 AA
+        continue-on-error: true
+        run: node scripts/a11y.mjs "${{ needs.deploy.outputs.page_url }}"
+
+      - name: Report accessibility problems
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: |
+          if [ ! -f .cache/a11y-report.md ]; then
+            echo "::warning::The accessibility check did not run to completion; see the step above."
+            exit 0
+          fi
+          open=$(gh issue list --label "accessibility" --state open --json number --jq '.[0].number')
+          if [ -s .cache/a11y-report.md ]; then
+            if [ -z "$open" ]; then
+              gh label create accessibility --color 8EB9FC --description "Automatic WCAG 2.2 AA check" 2>/dev/null || true
+              gh issue create --label accessibility --title "Accessibility problems found (WCAG 2.2 AA)" --body-file .cache/a11y-report.md
+            else
+              gh issue edit "$open" --body-file .cache/a11y-report.md
+            fi
+          elif [ -n "$open" ]; then
+            gh issue close "$open" --comment "The latest WCAG 2.2 AA check passed, so this is resolved."
+          fi
