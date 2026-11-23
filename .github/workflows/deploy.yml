@@ -75,6 +75,30 @@ jobs:
         with:
           path: dist
 
+  # Finds the merged pull request this run deploys. The accessibility and Lighthouse
+  # checks only run when there is one, so scheduled runs, manual runs and Pages CMS
+  # edits (which commit straight to main) skip them.
+  merged-pr:
+    runs-on: ubuntu-latest
+    permissions:
+      contents: read
+      pull-requests: read
+    outputs:
+      number: ${{ steps.find.outputs.number }}
+    steps:
+      - id: find
+        env:
+          GH_TOKEN: ${{ github.token }}
+          GH_REPO: ${{ github.repository }}
+          EVENT: ${{ github.event_name }}
+        run: |
+          number=""
+          if [ "$EVENT" = "push" ]; then
+            number=$(gh api "repos/$GH_REPO/commits/$GITHUB_SHA/pulls" --jq '[.[] | select(.merged_at != null)][0].number // empty')
+          fi
+          echo "number=$number" >> "$GITHUB_OUTPUT"
+          if [ -n "$number" ]; then echo "Deploying merged pull request #$number: post-deploy checks will run."; else echo "Not a pull request merge: post-deploy checks are skipped."; fi
+
   deploy:
     needs: build
     runs-on: ubuntu-latest
@@ -87,11 +111,16 @@ jobs:
       - id: deployment
         uses: actions/deploy-pages@v4
 
-  # WCAG 2.2 AA check of the live site with axe-core. Runs after deploy, so it never
-  # blocks a site update; problems go to an "accessibility" issue instead.
+  # WCAG 2.2 AA check of the live site with axe-core. Runs after a merged pull request
+  # is deployed, so it never blocks a site update; problems go to an "accessibility" issue.
   accessibility:
-    needs: deploy
+    needs: [deploy, merged-pr]
+    if: needs.merged-pr.outputs.number != ''
     runs-on: ubuntu-latest
+    permissions:
+      contents: read
+      issues: write
+      pull-requests: write
     steps:
       - uses: actions/checkout@v4
 
@@ -109,30 +138,48 @@ jobs:
         continue-on-error: true
         run: node scripts/a11y.mjs "${{ needs.deploy.outputs.page_url }}"
 
-      - name: Report accessibility problems
+      # Results go to a comment on the merged pull request (pass or fail), the run summary,
+      # and, when there are problems, an "accessibility" issue that closes once they're fixed.
+      - name: Post results
+        if: always()
         env:
           GH_TOKEN: ${{ github.token }}
+          GH_REPO: ${{ github.repository }}
+          PR: ${{ needs.merged-pr.outputs.number }}
+          RUN_URL: ${{ github.server_url }}/${{ github.repository }}/actions/runs/${{ github.run_id }}
         run: |
-          if [ ! -f .cache/a11y-report.md ]; then
+          if [ ! -f .cache/a11y-summary.md ]; then
             echo "::warning::The accessibility check did not run to completion; see the step above."
+            gh pr comment "$PR" --body "Post-deploy accessibility check of commit ${GITHUB_SHA::7} didn't finish. See the [workflow run]($RUN_URL)."
             exit 0
           fi
+          issue=""
           open=$(gh issue list --label "accessibility" --state open --json number --jq '.[0].number')
           if [ -s .cache/a11y-report.md ]; then
             if [ -z "$open" ]; then
               gh label create accessibility --color 8EB9FC --description "Automatic WCAG 2.2 AA check" 2>/dev/null || true
-              gh issue create --label accessibility --title "Accessibility problems found (WCAG 2.2 AA)" --body-file .cache/a11y-report.md
+              issue=$(gh issue create --label accessibility --title "Accessibility problems found (WCAG 2.2 AA)" --body-file .cache/a11y-report.md)
             else
               gh issue edit "$open" --body-file .cache/a11y-report.md
+              issue="#$open"
             fi
           elif [ -n "$open" ]; then
             gh issue close "$open" --comment "The latest WCAG 2.2 AA check passed, so this is resolved."
           fi
+          {
+            echo "Post-deploy check of commit ${GITHUB_SHA::7}."
+            echo
+            cat .cache/a11y-summary.md
+            if [ -n "$issue" ]; then echo; echo "Tracked in $issue."; fi
+          } > .cache/a11y-comment.md
+          cat .cache/a11y-comment.md >> "$GITHUB_STEP_SUMMARY"
+          gh pr comment "$PR" --body-file .cache/a11y-comment.md
 
-  # Lighthouse performance check of the live site. Results go to the run summary and,
-  # when the deploy came from merging a pull request, a comment on that pull request.
+  # Lighthouse performance check of the live site after a merged pull request is
+  # deployed. Results go to the run summary and a comment on that pull request.
   lighthouse:
-    needs: deploy
+    needs: [deploy, merged-pr]
+    if: needs.merged-pr.outputs.number != ''
     runs-on: ubuntu-latest
     permissions:
       contents: read
@@ -156,20 +203,14 @@ jobs:
         env:
           GH_TOKEN: ${{ github.token }}
           GH_REPO: ${{ github.repository }}
-          EVENT: ${{ github.event_name }}
+          PR: ${{ needs.merged-pr.outputs.number }}
+          RUN_URL: ${{ github.server_url }}/${{ github.repository }}/actions/runs/${{ github.run_id }}
         run: |
           if [ ! -s .cache/lighthouse-report.md ]; then
             echo "::warning::Lighthouse produced no report; see the step above."
+            gh pr comment "$PR" --body "Post-deploy Lighthouse check of commit ${GITHUB_SHA::7} didn't finish. See the [workflow run]($RUN_URL)."
             exit 0
           fi
           { echo "Post-deploy check of commit ${GITHUB_SHA::7}."; echo; cat .cache/lighthouse-report.md; } > .cache/lighthouse-comment.md
           cat .cache/lighthouse-comment.md >> "$GITHUB_STEP_SUMMARY"
-          # Only pushes come from a merge; scheduled and manual runs would re-comment on an old PR.
-          if [ "$EVENT" = "push" ]; then
-            pr=$(gh api "repos/$GH_REPO/commits/$GITHUB_SHA/pulls" --jq '.[0].number // empty')
-            if [ -n "$pr" ]; then
-              gh pr comment "$pr" --body-file .cache/lighthouse-comment.md
-            else
-              echo "This commit didn't come from a pull request (e.g. a Pages CMS edit); results are in the run summary only."
-            fi
-          fi
+          gh pr comment "$PR" --body-file .cache/lighthouse-comment.md
