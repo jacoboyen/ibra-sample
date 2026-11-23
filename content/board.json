@@ -8,7 +8,8 @@
     },
     {
       "name": "Jason Simpson",
-      "role": "Treasurer"
+      "role": "Treasurer",
+      "affiliation": "Sakari Sushi Lounge Race Team "
     },
     {
       "name": "Boyd Burnham",
@@ -19,16 +20,18 @@
       "role": "Director"
     },
     {
-      "name": "Larry Howe",
-      "role": "Director"
+      "name": "Noah Marcus",
+      "role": "Director",
+      "affiliation": "Zealous Racing"
     },
     {
-      "name": "Noah Marcus",
-      "role": "Director"
+      "name": "Larry Howe",
+      "role": "Advisor to the Board"
     },
     {
       "name": "Jacob Oyen",
-      "role": "Director"
+      "role": "Advisor to the Board",
+      "affiliation": "Zealous Racing"
     }
   ]
 }
