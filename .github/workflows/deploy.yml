@@ -75,6 +75,30 @@ jobs:
         with:
           path: dist
 
+  # Finds the merged pull request this run deploys. The accessibility and Lighthouse
+  # checks only run when there is one, so scheduled runs, manual runs and Pages CMS
+  # edits (which commit straight to main) skip them.
+  merged-pr:
+    runs-on: ubuntu-latest
+    permissions:
+      contents: read
+      pull-requests: read
+    outputs:
+      number: ${{ steps.find.outputs.number }}
+    steps:
+      - id: find
+        env:
+          GH_TOKEN: ${{ github.token }}
+          GH_REPO: ${{ github.repository }}
+          EVENT: ${{ github.event_name }}
+        run: |
+          number=""
+          if [ "$EVENT" = "push" ]; then
+            number=$(gh api "repos/$GH_REPO/commits/$GITHUB_SHA/pulls" --jq '[.[] | select(.merged_at != null)][0].number // empty')
+          fi
+          echo "number=$number" >> "$GITHUB_OUTPUT"
+          if [ -n "$number" ]; then echo "Deploying merged pull request #$number: post-deploy checks will run."; else echo "Not a pull request merge: post-deploy checks are skipped."; fi
+
   deploy:
     needs: build
     runs-on: ubuntu-latest
@@ -87,10 +111,11 @@ jobs:
       - id: deployment
         uses: actions/deploy-pages@v4
 
-  # WCAG 2.2 AA check of the live site with axe-core. Runs after deploy, so it never
-  # blocks a site update; problems go to an "accessibility" issue instead.
+  # WCAG 2.2 AA check of the live site with axe-core. Runs after a merged pull request
+  # is deployed, so it never blocks a site update; problems go to an "accessibility" issue.
   accessibility:
-    needs: deploy
+    needs: [deploy, merged-pr]
+    if: needs.merged-pr.outputs.number != ''
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
@@ -129,10 +154,11 @@ jobs:
             gh issue close "$open" --comment "The latest WCAG 2.2 AA check passed, so this is resolved."
           fi
 
-  # Lighthouse performance check of the live site. Results go to the run summary and,
-  # when the deploy came from merging a pull request, a comment on that pull request.
+  # Lighthouse performance check of the live site after a merged pull request is
+  # deployed. Results go to the run summary and a comment on that pull request.
   lighthouse:
-    needs: deploy
+    needs: [deploy, merged-pr]
+    if: needs.merged-pr.outputs.number != ''
     runs-on: ubuntu-latest
     permissions:
       contents: read
@@ -156,7 +182,7 @@ jobs:
         env:
           GH_TOKEN: ${{ github.token }}
           GH_REPO: ${{ github.repository }}
-          EVENT: ${{ github.event_name }}
+          PR: ${{ needs.merged-pr.outputs.number }}
         run: |
           if [ ! -s .cache/lighthouse-report.md ]; then
             echo "::warning::Lighthouse produced no report; see the step above."
@@ -164,12 +190,4 @@ jobs:
           fi
           { echo "Post-deploy check of commit ${GITHUB_SHA::7}."; echo; cat .cache/lighthouse-report.md; } > .cache/lighthouse-comment.md
           cat .cache/lighthouse-comment.md >> "$GITHUB_STEP_SUMMARY"
-          # Only pushes come from a merge; scheduled and manual runs would re-comment on an old PR.
-          if [ "$EVENT" = "push" ]; then
-            pr=$(gh api "repos/$GH_REPO/commits/$GITHUB_SHA/pulls" --jq '.[0].number // empty')
-            if [ -n "$pr" ]; then
-              gh pr comment "$pr" --body-file .cache/lighthouse-comment.md
-            else
-              echo "This commit didn't come from a pull request (e.g. a Pages CMS edit); results are in the run summary only."
-            fi
-          fi
+          gh pr comment "$PR" --body-file .cache/lighthouse-comment.md

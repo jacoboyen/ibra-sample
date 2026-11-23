@@ -49,7 +49,7 @@ npm run test:perf      # Lighthouse performance check of the running preview (se
 
 ## Accessibility
 
-After every deploy, the `accessibility` job checks the live site against WCAG 2.2 AA with [axe-core](https://github.com/dequelabs/axe-core). It tests one page of each kind (home, calendar, a past season, an upcoming and a past race, about, promoters, 404) at desktop and phone widths. If anything fails, it opens or updates an issue labelled `accessibility`, and closes the issue once the check passes. It never blocks a deploy.
+After a merged pull request is deployed, the `accessibility` job checks the live site against WCAG 2.2 AA with [axe-core](https://github.com/dequelabs/axe-core). It tests one page of each kind (home, calendar, a past season, an upcoming and a past race, about, promoters, 404) at desktop and phone widths. If anything fails, it opens or updates an issue labelled `accessibility`, and closes the issue once the check passes. It never blocks a deploy.
 
 To run it locally (the test tools aren't needed for the build, so they aren't in `package.json`):
 
@@ -64,7 +64,9 @@ Automated checks catch roughly a third to half of WCAG problems. Keyboard use, s
 
 ## Performance
 
-After every deploy, the `lighthouse` job runs [Lighthouse](https://developer.chrome.com/docs/lighthouse) on the live home page and calendar, on mobile and desktop, and reports the median of 3 runs: score, LCP, FCP, TBT, CLS, Speed Index and page weight. Results appear on the workflow run's summary page. When the deploy came from merging a pull request, they're also posted as a comment on that pull request. Scheduled runs and Pages CMS edits have no pull request, so their results are only in the run summary. The check reports scores and never blocks a deploy.
+After a merged pull request is deployed, the `lighthouse` job runs [Lighthouse](https://developer.chrome.com/docs/lighthouse) on the live home page and calendar, on mobile and desktop, and reports the median of 3 runs: score, LCP, FCP, TBT, CLS, Speed Index and page weight. Results are posted as a comment on that pull request and on the workflow run's summary page. The check reports scores and never blocks a deploy.
+
+Both post-deploy checks run **only when a deploy comes from a merged pull request**. Daily scheduled runs, manual "Run workflow" runs and Pages CMS edits (which commit straight to `main`) skip them; the `merged-pr` job decides. To test the live site without a merge, run the scripts locally (see above) against the live URL.
 
 To run it locally against `npm run serve`:
 
