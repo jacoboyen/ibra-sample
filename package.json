@@ -9,6 +9,7 @@
     "build:sample": "DATA_DIR=.cache/sample-seasons ICS_FILE=test/fixtures/calendar.ics BIKEREG_FILE=test/fixtures/bikereg.json TODAY=2027-03-01 node scripts/build.mjs",
     "serve": "node scripts/serve.mjs",
     "test": "node --test test/*.test.mjs",
-    "test:a11y": "node scripts/a11y.mjs"
+    "test:a11y": "node scripts/a11y.mjs",
+    "test:perf": "node scripts/lighthouse.mjs"
   }
 }

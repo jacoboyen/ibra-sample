@@ -39,6 +39,7 @@ npm run build:sample   # build from test fixtures (no network needed)
 npm run build          # build from the live Google Calendar and BikeReg
 npm run serve          # preview dist/ at http://localhost:8080
 npm run test:a11y      # WCAG 2.2 AA check of the running preview (see Accessibility)
+npm run test:perf      # Lighthouse performance check of the running preview (see Performance)
 ```
 
 ## Known assumptions to check after the first live run
@@ -60,6 +61,17 @@ npm run test:a11y                   # in another
 ```
 
 Automated checks catch roughly a third to half of WCAG problems. Keyboard use, screen-reader flow and wording still need a person to check now and then.
+
+## Performance
+
+After every deploy, the `lighthouse` job runs [Lighthouse](https://developer.chrome.com/docs/lighthouse) on the live home page and calendar, on mobile and desktop, and reports the median of 3 runs: score, LCP, FCP, TBT, CLS, Speed Index and page weight. Results appear on the workflow run's summary page. When the deploy came from merging a pull request, they're also posted as a comment on that pull request. Scheduled runs and Pages CMS edits have no pull request, so their results are only in the run summary. The check reports scores and never blocks a deploy.
+
+To run it locally against `npm run serve`:
+
+```bash
+npm install --no-save --no-package-lock lighthouse@13.6.0
+npm run test:perf
+```
 
 ## SEO and AI crawlers
 
