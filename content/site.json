@@ -40,10 +40,6 @@
     {
       "prefix": "MTB",
       "label": "Mountain bike"
-    },
-    {
-      "prefix": "TRACK",
-      "label": "Track"
     }
   ]
 }
