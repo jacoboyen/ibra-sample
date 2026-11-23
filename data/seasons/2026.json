@@ -783,5 +783,26 @@
     "logo": "https://www.bikereg.com/BR/VirtualImages/EventLogos/3bf6a552-b9ad-4b9e-91a2-4721ac964f0f.png",
     "bikeregName": "Iowa State Cyclocross Championships",
     "matchedBy": "name"
+  },
+  {
+    "uid": "63mi3mpf5u041tkedputbsa833@google.com",
+    "title": "IBRA Race Scheduling Meeting",
+    "kind": "Other",
+    "start": "2026-12-07",
+    "end": "2026-12-07",
+    "days": 1,
+    "location": "",
+    "city": "",
+    "description": "",
+    "permit": "",
+    "website": "",
+    "registration": "https://www.bikereg.com/78521",
+    "cancelled": false,
+    "year": 2026,
+    "path": "/races/2026/ibra-race-scheduling-meeting/",
+    "bikeregUrl": "https://www.bikereg.com/78521",
+    "logo": "https://www.bikereg.com/BR/VirtualImages/EventLogos/26c24490-9673-4051-8b4f-e630a360ad25.png",
+    "bikeregName": "IBRA 2027 Race Scheduling Meeting",
+    "matchedBy": "name"
   }
 ]
