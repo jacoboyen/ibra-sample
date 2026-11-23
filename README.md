@@ -49,7 +49,7 @@ npm run test:perf      # Lighthouse performance check of the running preview (se
 
 ## Accessibility
 
-After a merged pull request is deployed, the `accessibility` job checks the live site against WCAG 2.2 AA with [axe-core](https://github.com/dequelabs/axe-core). It tests one page of each kind (home, calendar, a past season, an upcoming and a past race, about, promoters, 404) at desktop and phone widths. If anything fails, it opens or updates an issue labelled `accessibility`, and closes the issue once the check passes. It never blocks a deploy.
+After a merged pull request is deployed, the `accessibility` job checks the live site against WCAG 2.2 AA with [axe-core](https://github.com/dequelabs/axe-core). It tests one page of each kind (home, calendar, a past season, an upcoming and a past race, about, promoters, 404) at desktop and phone widths. It posts the results as a comment on the merged pull request and on the run's summary page, pass or fail. If anything fails, it also opens or updates an issue labelled `accessibility` (linked from the comment), and closes the issue once the check passes. It never blocks a deploy.
 
 To run it locally (the test tools aren't needed for the build, so they aren't in `package.json`):
 

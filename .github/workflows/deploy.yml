@@ -117,6 +117,10 @@ jobs:
     needs: [deploy, merged-pr]
     if: needs.merged-pr.outputs.number != ''
     runs-on: ubuntu-latest
+    permissions:
+      contents: read
+      issues: write
+      pull-requests: write
     steps:
       - uses: actions/checkout@v4
 
@@ -134,25 +138,42 @@ jobs:
         continue-on-error: true
         run: node scripts/a11y.mjs "${{ needs.deploy.outputs.page_url }}"
 
-      - name: Report accessibility problems
+      # Results go to a comment on the merged pull request (pass or fail), the run summary,
+      # and, when there are problems, an "accessibility" issue that closes once they're fixed.
+      - name: Post results
+        if: always()
         env:
           GH_TOKEN: ${{ github.token }}
+          GH_REPO: ${{ github.repository }}
+          PR: ${{ needs.merged-pr.outputs.number }}
+          RUN_URL: ${{ github.server_url }}/${{ github.repository }}/actions/runs/${{ github.run_id }}
         run: |
-          if [ ! -f .cache/a11y-report.md ]; then
+          if [ ! -f .cache/a11y-summary.md ]; then
             echo "::warning::The accessibility check did not run to completion; see the step above."
+            gh pr comment "$PR" --body "Post-deploy accessibility check of commit ${GITHUB_SHA::7} didn't finish. See the [workflow run]($RUN_URL)."
             exit 0
           fi
+          issue=""
           open=$(gh issue list --label "accessibility" --state open --json number --jq '.[0].number')
           if [ -s .cache/a11y-report.md ]; then
             if [ -z "$open" ]; then
               gh label create accessibility --color 8EB9FC --description "Automatic WCAG 2.2 AA check" 2>/dev/null || true
-              gh issue create --label accessibility --title "Accessibility problems found (WCAG 2.2 AA)" --body-file .cache/a11y-report.md
+              issue=$(gh issue create --label accessibility --title "Accessibility problems found (WCAG 2.2 AA)" --body-file .cache/a11y-report.md)
             else
               gh issue edit "$open" --body-file .cache/a11y-report.md
+              issue="#$open"
             fi
           elif [ -n "$open" ]; then
             gh issue close "$open" --comment "The latest WCAG 2.2 AA check passed, so this is resolved."
           fi
+          {
+            echo "Post-deploy check of commit ${GITHUB_SHA::7}."
+            echo
+            cat .cache/a11y-summary.md
+            if [ -n "$issue" ]; then echo; echo "Tracked in $issue."; fi
+          } > .cache/a11y-comment.md
+          cat .cache/a11y-comment.md >> "$GITHUB_STEP_SUMMARY"
+          gh pr comment "$PR" --body-file .cache/a11y-comment.md
 
   # Lighthouse performance check of the live site after a merged pull request is
   # deployed. Results go to the run summary and a comment on that pull request.
@@ -183,9 +204,11 @@ jobs:
           GH_TOKEN: ${{ github.token }}
           GH_REPO: ${{ github.repository }}
           PR: ${{ needs.merged-pr.outputs.number }}
+          RUN_URL: ${{ github.server_url }}/${{ github.repository }}/actions/runs/${{ github.run_id }}
         run: |
           if [ ! -s .cache/lighthouse-report.md ]; then
             echo "::warning::Lighthouse produced no report; see the step above."
+            gh pr comment "$PR" --body "Post-deploy Lighthouse check of commit ${GITHUB_SHA::7} didn't finish. See the [workflow run]($RUN_URL)."
             exit 0
           fi
           { echo "Post-deploy check of commit ${GITHUB_SHA::7}."; echo; cat .cache/lighthouse-report.md; } > .cache/lighthouse-comment.md

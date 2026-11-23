@@ -4,8 +4,9 @@
 //   node scripts/a11y.mjs [site URL]     default http://localhost:8080/ (npm run serve)
 //
 // Tests one page per template (home, calendar, a past season, an upcoming and a past race,
-// about, promoters, 404) at desktop and phone widths. Writes .cache/a11y-report.md (empty
-// when clean) and exits 1 if anything fails.
+// about, promoters, 404) at desktop and phone widths. Writes .cache/a11y-report.md (issue
+// body; empty when clean) and .cache/a11y-summary.md (pull request comment; always written),
+// and exits 1 if anything fails.
 //
 // These tools are NOT needed to build the site. Install them only to run this check:
 //   npm install --no-save --no-package-lock playwright@1.63.0 axe-core@4.14.0
@@ -101,12 +102,16 @@ if (rules.length) {
     }
     if (r.nodes.size > 5) md += `- …and ${r.nodes.size - 5} more\n`;
   }
-  md += '\nThis issue updates on every build and closes itself when the check passes.\n';
 }
+const pages = targets.map(([l]) => l).join(', ');
+const summary = rules.length
+  ? md
+  : `## WCAG 2.2 AA check: passed\n\nNo problems found. Checked ${targets.length} page types at desktop and phone widths on ${base.href} with axe-core: ${pages}.\n\nAutomated checks catch roughly a third to half of WCAG problems; keyboard use and screen-reader flow still need a person now and then.\n`;
 await mkdir('.cache', { recursive: true });
-await writeFile('.cache/a11y-report.md', md);
+await writeFile('.cache/a11y-report.md', rules.length ? md + '\nThis issue updates after each merged pull request and closes itself when the check passes.\n' : '');
+await writeFile('.cache/a11y-summary.md', summary);
 
-console.log(`• Accessibility: checked ${checked} page views (${targets.map(([l]) => l).join(', ')})`);
+console.log(`• Accessibility: checked ${checked} page views (${pages})`);
 if (!rules.length) console.log('• WCAG 2.2 AA: no problems found');
 for (const r of rules) console.log(`! ${r.impact.padEnd(8)} ${r.id}: ${r.help} (${r.nodes.size} element${r.nodes.size === 1 ? '' : 's'})`);
 process.exit(rules.length ? 1 : 0);
